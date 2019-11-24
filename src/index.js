@@ -13,66 +13,124 @@ const port = process.env.PORT || 3000
 
 app.use(express.json())
 
-app.post('/users',(req,res)=>{
+app.post('/users',async (req,res)=>{
     const user = new User(req.body)
-    user.save().then(()=>{
+    
+    // performing the needful operation using promises for this remove the async from up above
+    // user.save().then(()=>{
+    //     res.status(201).send(user)
+    // }).catch((e)=>{
+    //     res.status(400)
+    //     res.send(e)
+    // })
+
+    //perfroming the needful operation using async and await
+    try{
+        await user.save()
         res.status(201).send(user)
-    }).catch((e)=>{
-        res.status(400)
-        res.send(e)
-    })
-})
-
-app.get('/users/:id',(req,res)=>{
-    User.findOne({
-        _id: req.params.id
-    }).then((user)=>{
-        if(!user){
-            return res.status(404).send('User not found!')
-        }
-        res.send(user)
-    }).catch(()=>{
-        res.status(400).send('Bad request')
-    })
-})
-
-app.get('/users',(req,res)=>{
-    User.find().then((users)=>{
-        res.send(users)
-    }).catch(()=>{
-        res.status(500).send()
-    })
-})
-
-app.post('/tasks',(req,res)=>{
-    const task = new Task(req.body)
-    task.save().then((result)=>{
-        res.status(201).send(result)
-    }).catch((e)=>{
+    } catch(e){
         res.status(400).send(e)
-    })
+    }
+    
+    
 })
 
-app.get('/tasks',(req,res)=>{
-    Task.find().then((tasks)=>{
+app.get('/users/:id',async (req,res)=>{
+    
+    
+    // User.findOne({
+    //     _id: req.params.id
+    // }).then((user)=>{
+    //     if(!user){
+    //         return res.status(404).send('User not found!')
+    //     }
+    //     res.send(user)
+    // }).catch(()=>{
+    //     res.status(400).send('Bad request')
+    // })
+
+    try{
+        const user = await User.findOne({_id: req.params.id})
+        if(!user){
+            return res.status(404).send('User not found')
+        }
+        res.status(200).send(user)
+    } catch(e){
+        res.status(400).send('Bad request')
+    }
+})
+
+app.get('/users',async (req,res)=>{
+
+    // User.find().then((users)=>{
+    //     res.send(users)
+    // }).catch(()=>{
+    //     res.status(500).send()
+    // })
+
+    try{
+        const users = await User.find()
+        res.send(users)
+    } catch(e){
+        res.status(500).send()
+    }
+    
+})
+
+app.post('/tasks',async (req,res)=>{
+    const task = new Task(req.body)
+    try{
+        await task.save()
+        res.status(201).send(task)
+    } catch(e){
+        res.status(400).send(e)
+    }
+
+    // task.save().then((result)=>{
+    //     res.status(201).send(result)
+    // }).catch((e)=>{
+    //     res.status(400).send(e)
+    // })
+})
+
+app.get('/tasks',async (req,res)=>{
+    
+    try{
+        const tasks = await Task.find()
         res.send(tasks)
-    }).catch((e)=>{
-        res.status(500).send('bad requests')
-    })
+    } catch(e){
+        res.status(400).send('No data found')
+    }
+    
+    // Task.find().then((tasks)=>{
+    //     res.send(tasks)
+    // }).catch((e)=>{
+    //     res.status(500).send('bad requests')
+    // })
 })
 
-app.get('/tasks/:id',(req,res)=>{
+app.get('/tasks/:id',async (req,res)=>{
     const _id = req.params.id
-    Task.findOne({
-        _id
-    }).then((task)=>{
+    // Task.findOne({
+    //     _id
+    // }).then((task)=>{
+    //     if(!task){
+    //         return res.status(404).send('Task not found')
+    //     }
+    //     res.send(task)
+    // }).catch(()=>{
+    //     res.status(500).send()
+    // })
+    try{
+        const task = await Task.findOne({_id})
         if(!task){
             return res.status(404).send('Task not found')
         }
         res.send(task)
-    }).catch(()=>{
+    } catch(e){
         res.status(500).send()
-    })
+    }
+    
 })
 app.listen(port, ()=>{
     console.log('Server started on port'+port)
